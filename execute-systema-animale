@@ -1,0 +1,71 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import random
+
+# Function to create a gradient orb
+def create_gradient_orb(colors, size=1000):
+    # Generate a grid of (x, y) coordinates
+    x = np.linspace(-1, 1, size)
+    y = np.linspace(-1, 1, size)
+    x, y = np.meshgrid(x, y)
+    
+    # Create a circular mask
+    mask = np.sqrt(x**2 + y**2)
+    
+    # Initialize the orb with the base color and alpha channel
+    orb = np.ones((size, size, 4))
+    
+    # Apply gradient within the circular mask
+    for i in range(3):  # For each color channel (R, G, B)
+        orb[:,:,i] = np.clip(colors[0][i] + (colors[1][i] - colors[0][i]) * mask, 0, 1)
+    
+    # Apply the circular mask for the alpha channel
+    orb[:,:,3] = np.clip(1 - mask, 0, 1)
+    
+    # Set the outer area to be fully transparent
+    orb[mask > 1] = [0, 0, 0, 0]
+    
+    return orb
+
+# Define Systema Animale colors (example RGB values)
+system_animale_colors = {
+    'pioneer': [(0.9, 0.7, 0.2), (0.1, 0.1, 0.1)],  # Example colors: light yellow to dark grey
+    'illuminator': [(0.7, 0.8, 1.0), (0.0, 0.3, 0.5)],  # Example colors: light blue to dark blue
+    'trailblazer': [(0.5, 1.0, 0.5), (0.1, 0.4, 0.1)],  # Example colors: light green to dark green
+    'cultivator': [(1.0, 0.6, 0.6), (0.5, 0.0, 0.0)],  # Example colors: light red to dark red
+    'artisan': [(0.8, 0.8, 0.8), (0.3, 0.3, 0.3)],  # Example colors: light grey to dark grey
+    'architect': [(0.8, 0.8, 1.0), (0.3, 0.3, 0.7)],  # Example colors: light purple to dark purple
+    'catalyst': [(1.0, 0.8, 0.5), (0.5, 0.3, 0.0)],  # Example colors: light orange to dark orange
+    'diplomat': [(0.6, 0.8, 0.9), (0.1, 0.3, 0.5)],  # Example colors: light teal to dark teal
+    'strategist': [(0.7, 0.7, 0.7), (0.2, 0.2, 0.2)],  # Example colors: light grey to black
+    'empath': [(0.9, 0.7, 1.0), (0.3, 0.0, 0.5)],  # Example colors: light pink to dark purple
+    'enigma': [(0.6, 0.6, 0.6), (0.0, 0.0, 0.0)],  # Example colors: light grey to black
+    'dreamer': [(0.8, 0.8, 1.0), (0.3, 0.3, 0.5)],  # Example colors: light blue to dark blue
+}
+
+# Generate random colors for variation
+def generate_random_colors(base_colors):
+    variation = 0.1
+    new_colors = []
+    for color in base_colors:
+        new_color = [min(max(c + random.uniform(-variation, variation), 0), 1) for c in color]
+        new_colors.append(new_color)
+    return new_colors
+
+# Function to create and save gradient orbs for each System Animale
+def create_gradient_orbs(colors_dict, num_images=111, size=1000):
+    counter = 1
+    for name, base_colors in colors_dict.items():
+        for _ in range(num_images // len(colors_dict)):
+            colors = generate_random_colors(base_colors)
+            orb = create_gradient_orb(colors, size)
+            fig, ax = plt.subplots()
+            fig.patch.set_alpha(0)
+            ax.imshow(orb, aspect='auto')
+            ax.axis('off')
+            plt.savefig(f'{name}_gradient_orb_{counter}.png', transparent=True, bbox_inches='tight', pad_inches=0)
+            plt.close(fig)
+            counter += 1
+
+# Create gradient orbs for Systema Animale
+create_gradient_orbs(system_animale_colors, num_images=111)
